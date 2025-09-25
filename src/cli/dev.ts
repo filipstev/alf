@@ -124,20 +124,24 @@ async function serveStaticFile(pathname: string): Promise<Response> {
   }
 }
 
-// Handle app routes with router integration
+// Handle app routes using server-side rendering
 async function handleAppRoute(pathname: string): Promise<Response> {
-  // Try to match a route
+  const { renderPage } = await import('../ssr');
+
+  // Match the route using our existing router
   const matchedRoute = matchRoute(pathname, routes);
 
   if (matchedRoute) {
-    return new Response(await renderAppPage(matchedRoute), {
-      headers: { "Content-Type": "text/html" },
+    // Server-render the matched route
+    const html = await renderPage(matchedRoute, {
+      hotReload: true
     });
-  } else if (pathname === "/" || pathname === "/index.html") {
-    return new Response(await renderDefaultPage(), {
+
+    return new Response(html, {
       headers: { "Content-Type": "text/html" },
     });
   } else {
+    // Render 404 page
     return new Response(await render404Page(pathname), {
       status: 404,
       headers: { "Content-Type": "text/html" },
@@ -145,90 +149,6 @@ async function handleAppRoute(pathname: string): Promise<Response> {
   }
 }
 
-// Render app page with matched route
-async function renderAppPage(matchedRoute: any) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Alf App</title>
-    ${hotReloadScript()}
-    ${errorOverlayScript()}
-</head>
-<body>
-    <div id="app"></div>
-    <script type="module">
-      import { render, h } from '/src/core/index.ts';
-      import { createRouter } from '/src/router/index.ts';
-
-      // Initialize router
-      const router = createRouter();
-
-      // This will load the matched route component
-      console.log('Matched route:', ${JSON.stringify(matchedRoute)});
-
-      // For now, render a placeholder
-      const App = () => h('div', null,
-        h('h1', null, 'Route: ${matchedRoute.pattern}'),
-        h('pre', null, JSON.stringify(${JSON.stringify(matchedRoute)}, null, 2))
-      );
-
-      render(h(App), document.getElementById('app'));
-    </script>
-</body>
-</html>`;
-}
-
-// Render default development page
-async function renderDefaultPage() {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Alf Development Server</title>
-    ${hotReloadScript()}
-    ${errorOverlayScript()}
-</head>
-<body>
-    <div id="app"></div>
-    <script type="module">
-      import { render, h, signal } from '/src/core/index.ts';
-
-      const App = () => {
-        const count = signal(0);
-        return h('div', { style: 'padding: 2rem; font-family: system-ui' },
-          h('h1', null, '🦞 Alf Development Server'),
-          h('p', null, 'Framework is ready for development!'),
-          h('div', { style: 'margin: 1rem 0' },
-            h('button', {
-              onClick: () => count.update(c => c + 1),
-              style: 'padding: 0.5rem 1rem; margin-right: 1rem'
-            }, 'Count: ', count),
-            h('button', {
-              onClick: () => count.set(0),
-              style: 'padding: 0.5rem 1rem'
-            }, 'Reset')
-          ),
-          h('div', { style: 'margin-top: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 4px' },
-            h('h3', null, 'Available Routes:'),
-            h('ul', null,
-              ...${JSON.stringify(routes.map((r: any) => r.pattern))}.map((pattern: string) =>
-                h('li', { key: pattern },
-                  h('a', { href: pattern === '/index' ? '/' : pattern }, pattern)
-                )
-              )
-            )
-          )
-        );
-      };
-
-      render(h(App), document.getElementById('app'));
-    </script>
-</body>
-</html>`;
-}
 
 // Render 404 page
 async function render404Page(pathname: string) {
