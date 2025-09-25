@@ -127,7 +127,7 @@ async function serveStaticFile(pathname: string): Promise<Response> {
 // Handle app routes with router integration
 async function handleAppRoute(pathname: string): Promise<Response> {
   // Try to match a route
-  const matchedRoute = matchRoute(routes, pathname);
+  const matchedRoute = matchRoute(pathname, routes);
 
   if (matchedRoute) {
     return new Response(await renderAppPage(matchedRoute), {
