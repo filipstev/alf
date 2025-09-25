@@ -19,3 +19,6 @@ export const jsxs = jsx;
 export { Fragment };
 
 export type { AlfElement, AlfNode, AlfProps };
+
+// Re-export JSX types for TypeScript JSX resolution
+export * from './types';

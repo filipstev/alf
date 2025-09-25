@@ -69,9 +69,13 @@ Converts virtual elements to real DOM while setting up reactive subscriptions fo
 
 Next.js-style routing that scans your `pages/` directory at build time and creates optimal route matching at runtime.
 
-### 5. Development Server (`src/cli/dev.ts`)
+### 5. CLI System (`src/cli/`)
 
-Bun.serve()-powered development environment with WebSocket-based hot reloading.
+Complete command-line interface built on Bun's native capabilities:
+
+- **Development Server (`dev.ts`)** - Bun.serve() with WebSocket hot reloading
+- **Production Build (`build.ts`)** - Bun.build() native bundler with optimization
+- **Production Server (`start.ts`)** - Optimized Bun.serve() for production deployment
 
 ## 📚 **Deep Dive Documentation**
 
@@ -80,9 +84,10 @@ Bun.serve()-powered development environment with WebSocket-based hot reloading.
 3. **[Rendering Engine](./rendering.md)** - DOM manipulation and lifecycle
 4. **[Router Architecture](./router.md)** - File-system routing and navigation
 5. **[Development Server](./dev-server.md)** - Hot reloading and development experience
-6. **[API Reference](./api-reference.md)** - Complete API documentation
-7. **[Design Decisions](./design-decisions.md)** - Why we made specific choices
-8. **[Performance Guide](./performance.md)** - Optimization strategies
+6. **[CLI Commands](./cli.md)** - Complete command-line interface documentation
+7. **[API Reference](./api-reference.md)** - Complete API documentation
+8. **[Design Decisions](./design-decisions.md)** - Why we made specific choices
+9. **[Performance Guide](./performance.md)** - Optimization strategies
 
 ## 🚀 **Quick Start for Contributors**
 
@@ -98,6 +103,12 @@ bun test
 # Start development server
 bun run dev
 
+# Build for production
+bun run build
+
+# Start production server
+bun run start
+
 # View documentation
 open docs/README.md
 ```
@@ -107,8 +118,9 @@ open docs/README.md
 1. **Start with [Reactivity System](./reactivity.md)** to understand the core concept
 2. **Read [JSX Runtime](./jsx-runtime.md)** to see how components work
 3. **Explore [Router Architecture](./router.md)** for routing concepts
-4. **Check [API Reference](./api-reference.md)** for practical usage
-5. **Review [Design Decisions](./design-decisions.md)** for the "why" behind choices
+4. **Try the [CLI Commands](./cli.md)** to experience the development workflow
+5. **Check [API Reference](./api-reference.md)** for practical usage
+6. **Review [Design Decisions](./design-decisions.md)** for the "why" behind choices
 
 ---
 

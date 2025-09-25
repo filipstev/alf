@@ -13,6 +13,8 @@ export interface Signal<T> {
   (): T;
   (value: T): T;
   peek(): T;
+  set(value: T): void;
+  update(fn: (prev: T) => T): void;
 }
 
 /**
@@ -40,3 +42,16 @@ export type AlfNode = AlfElement | string | number | boolean | null | undefined;
  * DOM types for rendering
  */
 export type DOMNode = Element | Text | Comment;
+
+/**
+ * JSX namespace declarations to override React types
+ */
+declare global {
+  namespace JSX {
+    interface Element extends AlfElement {}
+
+    interface IntrinsicElements {
+      [elemName: string]: AlfProps;
+    }
+  }
+}

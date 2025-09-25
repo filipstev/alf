@@ -7,7 +7,7 @@
 
 import { readdirSync, statSync } from "fs";
 import { join, relative, extname, basename } from "path";
-import type { RouteDefinition, MatchedRoute } from './types';
+import type { RouteDefinition, MatchedRoute } from "./types";
 
 /**
  * Scans the pages directory and builds route definitions using Bun's file system APIs.
@@ -27,9 +27,14 @@ export function scanRoutes(pagesDir: string): RouteDefinition[] {
           scanDirectory(fullPath, join(basePath, entry));
         } else if (stat.isFile()) {
           const ext = extname(entry);
-          if (ext === '.tsx' || ext === '.ts') {
+          if (ext === ".tsx" || ext === ".ts") {
             const fileName = basename(entry, ext);
-            const route = createRouteFromFile(fullPath, basePath, fileName, pagesDir);
+            const route = createRouteFromFile(
+              fullPath,
+              basePath,
+              fileName,
+              pagesDir
+            );
             if (route) {
               routes.push(route);
             }
@@ -58,51 +63,51 @@ function createRouteFromFile(
 ): RouteDefinition | null {
   let pattern = basePath;
 
-  if (fileName === 'index') {
-    pattern = pattern || '/';
+  if (fileName === "index") {
+    pattern = pattern || "/";
   } else {
     pattern = join(pattern, fileName);
   }
 
-  if (!pattern.startsWith('/')) {
-    pattern = '/' + pattern;
+  if (!pattern.startsWith("/")) {
+    pattern = "/" + pattern;
   }
 
   const params: string[] = [];
 
   pattern = pattern.replace(/\[([^\]]+)\]/g, (match, paramName) => {
     params.push(paramName);
-    return ':' + paramName;
+    return ":" + paramName;
   });
 
   pattern = pattern.replace(/:\.\.\.(.*)/g, (match, paramName) => {
-    const index = params.indexOf('...' + paramName);
+    const index = params.indexOf("..." + paramName);
     if (index > -1) {
       params.splice(index, 1);
-      params.push('*' + paramName);
+      params.push("*" + paramName);
     }
-    return '*';
+    return "*";
   });
 
   return {
     filePath: relative(pagesDir, filePath),
     pattern,
     params,
-    component: () => import(filePath)
+    component: () => import(filePath),
   };
 }
 
 function getRouteSpecificity(pattern: string): number {
-  const segments = pattern.split('/').filter(Boolean);
+  const segments = pattern.split("/").filter(Boolean);
 
   let staticSegments = 0;
   let dynamicSegments = 0;
   let catchAllSegments = 0;
 
   for (const segment of segments) {
-    if (segment === '*') {
+    if (segment === "*") {
       catchAllSegments++;
-    } else if (segment.startsWith(':')) {
+    } else if (segment.startsWith(":")) {
       dynamicSegments++;
     } else {
       staticSegments++;
@@ -118,9 +123,13 @@ function getRouteSpecificity(pattern: string): number {
   return score;
 }
 
-export function matchRoute(path: string, routes: RouteDefinition[]): MatchedRoute | null {
-  const [pathname, queryString] = path.split('?');
-  const query = parseQueryString(queryString || '');
+export function matchRoute(
+  path: string,
+  routes: RouteDefinition[]
+): MatchedRoute | null {
+  console.log(path, "ovde");
+  const [pathname, queryString] = path.split("?");
+  const query = parseQueryString(queryString || "");
 
   for (const route of routes) {
     const params = matchPattern(pathname, route.pattern);
@@ -128,7 +137,7 @@ export function matchRoute(path: string, routes: RouteDefinition[]): MatchedRout
       return {
         route,
         params,
-        query
+        query,
       };
     }
   }
@@ -136,11 +145,14 @@ export function matchRoute(path: string, routes: RouteDefinition[]): MatchedRout
   return null;
 }
 
-function matchPattern(path: string, pattern: string): Record<string, string> | null {
-  const pathSegments = path.split('/').filter(Boolean);
-  const patternSegments = pattern.split('/').filter(Boolean);
+function matchPattern(
+  path: string,
+  pattern: string
+): Record<string, string> | null {
+  const pathSegments = path.split("/").filter(Boolean);
+  const patternSegments = pattern.split("/").filter(Boolean);
 
-  const catchAllIndex = patternSegments.findIndex(seg => seg === '*');
+  const catchAllIndex = patternSegments.findIndex((seg) => seg === "*");
   if (catchAllIndex !== -1) {
     if (pathSegments.length < catchAllIndex) return null;
 
@@ -150,14 +162,14 @@ function matchPattern(path: string, pattern: string): Record<string, string> | n
       const pathSeg = pathSegments[i];
       const patternSeg = patternSegments[i];
 
-      if (patternSeg.startsWith(':')) {
+      if (patternSeg.startsWith(":")) {
         params[patternSeg.slice(1)] = pathSeg;
       } else if (pathSeg !== patternSeg) {
         return null;
       }
     }
 
-    const remaining = pathSegments.slice(catchAllIndex).join('/');
+    const remaining = pathSegments.slice(catchAllIndex).join("/");
     params.slug = remaining;
 
     return params;
@@ -173,7 +185,7 @@ function matchPattern(path: string, pattern: string): Record<string, string> | n
     const pathSeg = pathSegments[i];
     const patternSeg = patternSegments[i];
 
-    if (patternSeg.startsWith(':')) {
+    if (patternSeg.startsWith(":")) {
       params[patternSeg.slice(1)] = pathSeg;
     } else if (pathSeg !== patternSeg) {
       return null;
@@ -188,11 +200,11 @@ function parseQueryString(queryString: string): Record<string, string> {
 
   if (!queryString) return params;
 
-  const pairs = queryString.split('&');
+  const pairs = queryString.split("&");
   for (const pair of pairs) {
-    const [key, value] = pair.split('=');
+    const [key, value] = pair.split("=");
     if (key) {
-      params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+      params[decodeURIComponent(key)] = decodeURIComponent(value || "");
     }
   }
 

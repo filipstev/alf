@@ -5,6 +5,9 @@
  * Provides fine-grained reactivity, JSX runtime, and efficient DOM rendering.
  */
 
+// Set up JSX globals automatically
+import './jsx-global';
+
 // Export all types
 export type {
   Signal,

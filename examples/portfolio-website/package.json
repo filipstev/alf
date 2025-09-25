@@ -1,0 +1,16 @@
+{
+  "name": "portfolio-website",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run ../../src/cli/dev.ts",
+    "build": "bun run ../../src/cli/build.ts",
+    "start": "bun run ../../src/cli/start.ts",
+    "test": "bun test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
