@@ -91,12 +91,9 @@ export async function renderPage(
  * fragments, and nested structures.
  */
 function vdomToHtml(vdom: AlfNode): string {
-  console.log("==============================");
   if (vdom === null || vdom === undefined || typeof vdom === "boolean") {
     return "";
   }
-
-  console.log("Rendering vdom node:", vdom, typeof vdom);
 
   if (typeof vdom === "string" || typeof vdom === "number") {
     return escapeHtml(String(vdom));
@@ -133,14 +130,6 @@ function vdomToHtml(vdom: AlfNode): string {
       const props = element.props || {};
       const children = element.children || [];
 
-      console.log(
-        "Rendering tag:",
-        tag,
-        "with props:",
-        props,
-        "and children count:",
-        children
-      );
 
       // Generate attributes string
       const attrs = Object.entries(props || {})
@@ -178,7 +167,6 @@ function vdomToHtml(vdom: AlfNode): string {
 
       // Regular tags with content
       const childrenHtml = children.map(vdomToHtml).join("");
-      console.log(`Rendered <${tag}> with content:`, childrenHtml);
       return `<${tag}${attrsStr}>${childrenHtml}</${tag}>`;
     }
   }
@@ -278,13 +266,13 @@ function generateHotReloadScript(): string {
 
 /**
  * Escape HTML to prevent XSS attacks
+ * Server-safe implementation that doesn't rely on DOM APIs
  */
 function escapeHtml(text: string): string {
-  const div = { innerHTML: "" } as any;
-  div.textContent = text;
-  return div.innerHTML
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
+  return text
+    .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

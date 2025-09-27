@@ -43,8 +43,15 @@ function createDevServer(): BunServer {
           return await serveSourceFile(url.pathname);
         }
 
+        // Handle client JavaScript bundle
+        if (url.pathname === "/_alf/client.js") {
+          return await serveClientBundle();
+        }
+
         // Handle static files
-        if (url.pathname.startsWith("/public/")) {
+        if (url.pathname.startsWith("/public/") ||
+            url.pathname.startsWith("/src/") ||
+            url.pathname.startsWith("/pages/")) {
           return await serveStaticFile(url.pathname);
         }
 
@@ -102,6 +109,25 @@ async function serveSourceFile(pathname: string): Promise<Response> {
 }
 
 // Serve static files
+// Serve the client JavaScript bundle
+async function serveClientBundle(): Promise<Response> {
+  try {
+    const clientPath = join(CWD, "src/client/hydrate.ts");
+    console.log(`Serving client bundle: ${clientPath}`);
+
+    const file = Bun.file(clientPath);
+    return new Response(file, {
+      headers: {
+        "Content-Type": "application/javascript",
+        "Cache-Control": "no-cache"
+      }
+    });
+  } catch (error) {
+    console.error("Error serving client bundle:", error);
+    return new Response("Client bundle not found", { status: 404 });
+  }
+}
+
 async function serveStaticFile(pathname: string): Promise<Response> {
   const filePath = join(CWD, pathname);
 
@@ -126,15 +152,18 @@ async function serveStaticFile(pathname: string): Promise<Response> {
 
 // Handle app routes using server-side rendering
 async function handleAppRoute(pathname: string): Promise<Response> {
-  const { renderPage } = await import('../ssr');
+  // Import clean server renderer
+  const { renderPage } = await import('../ssr/render');
 
   // Match the route using our existing router
   const matchedRoute = matchRoute(pathname, routes);
 
   if (matchedRoute) {
-    // Server-render the matched route
-    const html = await renderPage(matchedRoute, {
-      hotReload: true
+    // Server-render with full route table and development options
+    const html = await renderPage(matchedRoute, routes, {
+      hotReload: true,
+      // In development, no client manifest needed (uses dev paths)
+      clientManifest: {}
     });
 
     return new Response(html, {

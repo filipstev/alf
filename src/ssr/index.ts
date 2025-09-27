@@ -1,10 +1,12 @@
 /**
  * Alf Framework - Server-Side Rendering
  *
- * Public API for SSR functionality. This module provides the main
- * functions needed to render components on the server and hydrate
- * them on the client.
+ * Server-only exports for SSR functionality.
+ * Client hydration is now handled by src/client/hydrate.ts
  */
 
-export { renderToString, renderPage } from './server-renderer';
-export { hydrate, getCurrentRouter } from './client-hydrator';
+// Server-side rendering exports
+export { renderToString, renderPage } from './render';
+
+// Legacy exports for compatibility (deprecated)
+export { renderToString as renderComponentToString } from './render';

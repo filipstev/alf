@@ -87,6 +87,40 @@ class AlfClientRouter {
 
     this.setupEventListeners();
     console.log('Client router initialized with routes:', this.routes.map((r: any) => r.pattern));
+
+    // Load and hydrate the initial route component
+    this.hydrateInitialRoute(options.route);
+  }
+
+  /**
+   * Hydrate the initial server-rendered route
+   */
+  private async hydrateInitialRoute(matchedRoute: MatchedRoute): Promise<void> {
+    try {
+      console.log('🔄 Hydrating initial route:', matchedRoute.route.pattern);
+
+      // Load the component (same as server did)
+      const componentPath = `/pages/${matchedRoute.route.filePath}`;
+      const module = await import(componentPath);
+      const Component = module.default;
+
+      if (!Component) {
+        throw new Error('Component does not have a default export');
+      }
+
+      console.log('🔗 Component loaded, connecting to DOM...');
+
+      // PROGRESSIVE ENHANCEMENT:
+      // Server HTML shows immediately, then client takes over with full interactivity
+      // This is simpler and more reliable than complex DOM walking
+      render(h(Component, matchedRoute.params), this.appElement);
+
+      console.log('✅ Hydration complete - component is now interactive');
+
+    } catch (error) {
+      console.error('❌ Hydration failed:', error);
+      await this.renderError(window.location.pathname, error);
+    }
   }
 
   /**
@@ -281,6 +315,7 @@ function setupHotReload(): void {
     console.log('🔥 Hot reload setup failed:', error);
   }
 }
+
 
 /**
  * Get the current router instance (for debugging)
