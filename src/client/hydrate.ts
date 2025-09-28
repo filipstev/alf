@@ -287,7 +287,13 @@ function setupHotReload(): void {
   (window as any).__alfHMR = true;
 
   try {
-    const ws = new WebSocket('ws://localhost:3000/_hot-reload');
+    const wsUrl = (() => {
+      const { protocol, host } = window.location;
+      const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${wsProtocol}//${host}/__alf_ws`;
+    })();
+
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       console.log('🔥 Hot reload connected');
